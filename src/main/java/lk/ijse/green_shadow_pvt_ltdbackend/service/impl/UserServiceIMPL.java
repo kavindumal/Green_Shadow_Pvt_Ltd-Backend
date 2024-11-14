@@ -1,5 +1,6 @@
 package lk.ijse.green_shadow_pvt_ltdbackend.service.impl;
 
+import jakarta.transaction.Transactional;
 import lk.ijse.green_shadow_pvt_ltdbackend.customObj.UserErrorResponse;
 import lk.ijse.green_shadow_pvt_ltdbackend.customObj.UserResponse;
 import lk.ijse.green_shadow_pvt_ltdbackend.dao.UserDao;
@@ -8,12 +9,10 @@ import lk.ijse.green_shadow_pvt_ltdbackend.entity.UserEntity;
 import lk.ijse.green_shadow_pvt_ltdbackend.exception.DataPersistFailedException;
 import lk.ijse.green_shadow_pvt_ltdbackend.exception.UserNotFoundException;
 import lk.ijse.green_shadow_pvt_ltdbackend.service.UserService;
-import lk.ijse.green_shadow_pvt_ltdbackend.util.AppUtil;
 import lk.ijse.green_shadow_pvt_ltdbackend.util.Mapping;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -61,10 +60,10 @@ public class UserServiceIMPL implements UserService {
     }
 
     @Override
-    public UserResponse getSelectedUser(String userId) {
-        if(userDao.existsById(userId)){
-            UserEntity userEntityByUserId = userDao.getUserEntityByUserId(userId);
-            return mapping.convertToUserDTO(userEntityByUserId);
+    public UserResponse getSelectedUser(String emailAddress) {
+        if(userDao.existsById(emailAddress)){
+            UserEntity userEntityByUserEmail = userDao.getUserEntityByEmail(emailAddress);
+            return mapping.convertToUserDTO(userEntityByUserEmail);
         }else {
             return new UserErrorResponse(0, "User not found");
         }
