@@ -5,6 +5,7 @@ import lk.ijse.green_shadow_pvt_ltdbackend.dto.impl.UserDTO;
 import lk.ijse.green_shadow_pvt_ltdbackend.exception.DataPersistFailedException;
 import lk.ijse.green_shadow_pvt_ltdbackend.exception.UserNotFoundException;
 import lk.ijse.green_shadow_pvt_ltdbackend.service.UserService;
+import lk.ijse.green_shadow_pvt_ltdbackend.util.AesAlgorithm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,10 +29,11 @@ public class UserController {
             @RequestPart ("password") String password,
             @RequestPart ("role") String role) {
         try {
+            AesAlgorithm aesAlgorithm = new AesAlgorithm();
             UserDTO buildUserDTO = new UserDTO();
 
-            buildUserDTO.setEmail(email);
-            buildUserDTO.setPassword(password);
+            buildUserDTO.setEmail(aesAlgorithm.encrypt(email));
+            buildUserDTO.setPassword(aesAlgorithm.encrypt(password));
             buildUserDTO.setRole(role);
 
             userService.saveUser(buildUserDTO);
@@ -47,7 +49,9 @@ public class UserController {
     @DeleteMapping("/{email}")
     public ResponseEntity<Void> deleteUser(@PathVariable ("email") String email) {
         try {
-            userService.deleteUser(email);
+            AesAlgorithm aesAlgorithm = new AesAlgorithm();
+
+            userService.deleteUser(aesAlgorithm.encrypt(email));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (UserNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -57,8 +61,9 @@ public class UserController {
     }
 
     @GetMapping(value = "/{email}",produces = MediaType.APPLICATION_JSON_VALUE)
-    public UserResponse getSelectedUser(@PathVariable ("email") String userId){
-        return userService.getSelectedUser(userId);
+    public UserResponse getSelectedUser(@PathVariable ("email") String email) throws Exception {
+        AesAlgorithm aesAlgorithm = new AesAlgorithm();
+        return userService.getSelectedUser(aesAlgorithm.encrypt(email));
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -73,10 +78,11 @@ public class UserController {
             @RequestPart ("role") String role
     ){
         try {
+            AesAlgorithm aesAlgorithm = new AesAlgorithm();
             var updateUser = new UserDTO();
 
-            updateUser.setEmail(email);
-            updateUser.setPassword(password);
+            updateUser.setEmail(aesAlgorithm.encrypt(email));
+            updateUser.setPassword(aesAlgorithm.encrypt(password));
             updateUser.setRole(role);
 
             userService.updateUser(updateUser);
