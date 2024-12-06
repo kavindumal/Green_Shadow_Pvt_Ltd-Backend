@@ -1,5 +1,6 @@
 package lk.ijse.green_shadow_pvt_ltdbackend.config;
 
+import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -7,7 +8,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lk.ijse.green_shadow_pvt_ltdbackend.service.JWTService;
 import lk.ijse.green_shadow_pvt_ltdbackend.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;

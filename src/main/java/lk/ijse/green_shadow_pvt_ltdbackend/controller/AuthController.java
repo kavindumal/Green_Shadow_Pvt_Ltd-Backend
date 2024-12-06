@@ -1,7 +1,7 @@
 package lk.ijse.green_shadow_pvt_ltdbackend.controller;
 
-import lk.ijse.green_shadow_pvt_ltdbackend.dto.UserDTO;
 import lk.ijse.green_shadow_pvt_ltdbackend.exception.DataPersistFailedException;
+import lk.ijse.green_shadow_pvt_ltdbackend.dto.UserDTO;
 import lk.ijse.green_shadow_pvt_ltdbackend.jwtModel.JWTAuthResponse;
 import lk.ijse.green_shadow_pvt_ltdbackend.jwtModel.SignIn;
 import lk.ijse.green_shadow_pvt_ltdbackend.service.AuthenticationService;
@@ -64,7 +64,7 @@ public class AuthController {
         return ResponseEntity.ok(authenticationService.signIn(sign));
     }
 
-    @PostMapping("/validate-token")
+    @PostMapping("/validate-token")  // frontend eken ewan ekayi api genaratore karana ekayi 2ma ekada kiyala check karanwa
     public ResponseEntity<?> validateToken(@RequestHeader("Authorization") String token) {
         try {
             if (token.startsWith("Bearer ")) {

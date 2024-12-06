@@ -8,7 +8,7 @@ public class AppUtil {
         return Base64.getEncoder().encodeToString(pic);
     }
 
-    public static Point parseLocation(String location) {
+    public static Point parseLocation(String location) { //location eka string ekak meka comma separated ekak
         String[] coordinates = location.split(",");
         if (coordinates.length == 2) {
             double latitude = Double.parseDouble(coordinates[0]);
