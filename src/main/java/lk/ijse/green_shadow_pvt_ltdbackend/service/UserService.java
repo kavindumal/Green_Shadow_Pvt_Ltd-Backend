@@ -1,14 +1,12 @@
 package lk.ijse.green_shadow_pvt_ltdbackend.service;
 
-import lk.ijse.green_shadow_pvt_ltdbackend.customObj.UserResponse;
-import lk.ijse.green_shadow_pvt_ltdbackend.dto.impl.UserDTO;
-
-import java.util.List;
+import lk.ijse.green_shadow_pvt_ltdbackend.dto.UserDTO;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService {
-    void saveUser(UserDTO userDTO);
-    void updateUser(UserDTO userDTO);
-    void deleteUser(String userId);
-    UserResponse getSelectedUser(String userId);
-    List<UserDTO> getAllUsers();
+    void saveUser(UserDTO user);
+    void updateUser(String email, UserDTO user);
+    boolean searchUser(String email);
+    boolean deleteUser(String email);
+    UserDetailsService userDetailsService();
 }

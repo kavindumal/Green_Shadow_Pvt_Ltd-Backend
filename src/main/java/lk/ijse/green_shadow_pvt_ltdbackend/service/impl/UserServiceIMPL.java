@@ -1,77 +1,84 @@
 package lk.ijse.green_shadow_pvt_ltdbackend.service.impl;
 
-import jakarta.transaction.Transactional;
-import lk.ijse.green_shadow_pvt_ltdbackend.customObj.UserErrorResponse;
-import lk.ijse.green_shadow_pvt_ltdbackend.customObj.UserResponse;
-import lk.ijse.green_shadow_pvt_ltdbackend.dao.UserDao;
-import lk.ijse.green_shadow_pvt_ltdbackend.dto.impl.UserDTO;
+import lk.ijse.green_shadow_pvt_ltdbackend.dao.StaffDAO;
+import lk.ijse.green_shadow_pvt_ltdbackend.dao.UserDAO;
+import lk.ijse.green_shadow_pvt_ltdbackend.dto.UserDTO;
+import lk.ijse.green_shadow_pvt_ltdbackend.entity.StaffEntity;
 import lk.ijse.green_shadow_pvt_ltdbackend.entity.UserEntity;
 import lk.ijse.green_shadow_pvt_ltdbackend.exception.DataPersistFailedException;
-import lk.ijse.green_shadow_pvt_ltdbackend.exception.UserNotFoundException;
+import lk.ijse.green_shadow_pvt_ltdbackend.exception.NotFoundException;
 import lk.ijse.green_shadow_pvt_ltdbackend.service.UserService;
-import lk.ijse.green_shadow_pvt_ltdbackend.util.Mapping;
+import lk.ijse.green_shadow_pvt_ltdbackend.util.MappingUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class UserServiceIMPL implements UserService {
+    @Autowired
+    private UserDAO userDAO;
 
     @Autowired
-    private final UserDao userDao;
+    private StaffDAO staffDAO;
 
     @Autowired
-    private final Mapping mapping;
+    private MappingUtil mappingUtil;
 
     @Override
-    public void saveUser(UserDTO userDTO) {
-        UserEntity savedUser =
-                userDao.save(mapping.convertToUserEntity(userDTO));
-        if(savedUser == null ) {
-            throw new DataPersistFailedException("Cannot data saved");
+    public void saveUser(UserDTO user) {
+        user.setRole(UserDTO.Role.valueOf(getUserRole(user.getEmail()).name()));
+        UserEntity savedUser = userDAO.save(mappingUtil.userConvertToEntity(user));
+        if (savedUser != null) {
+            System.out.println("User saved successfully");
+        } else {
+            throw new DataPersistFailedException("User save unsuccessful");
         }
     }
 
     @Override
-    public void updateUser(UserDTO userDTO) {
-        Optional<UserEntity> tmpUser = userDao.findById(userDTO.getEmail());
-        if(!tmpUser.isPresent()){
-            throw new UserNotFoundException("User not found");
-        }else {
-            tmpUser.get().setEmail(userDTO.getEmail());
-            tmpUser.get().setPassword(userDTO.getPassword());
-            tmpUser.get().setRole(userDTO.getRole());
+    public void updateUser(String email, UserDTO user) {
+        Optional<UserEntity> tmpUserEntity = userDAO.findByEmail(email);
+        if (tmpUserEntity.isPresent()){
+            UserEntity userEntity = mappingUtil.userConvertToEntity(user);
+            tmpUserEntity.get().setPassword(userEntity.getPassword());
+            System.out.println("User password updated successfully: " + tmpUserEntity.get());
+        } else {
+            throw new NotFoundException("User not found with email: " + email);
         }
     }
 
     @Override
-    public void deleteUser(String userId) {
-        Optional<UserEntity> selectedUserId = userDao.findById(userId);
-        if(!selectedUserId.isPresent()){
-            throw new UserNotFoundException("User not found");
-        }else {
-            userDao.deleteById(userId);
+    public boolean searchUser(String email) {
+        Optional<StaffEntity> user = staffDAO.findByEmail(email);
+        return user.isPresent();
+    }
+
+    @Override
+    public boolean deleteUser(String email) {
+        Optional<UserEntity> user = userDAO.findByEmail(email);
+        if (user.isPresent()) {
+            userDAO.delete(user.get());
+            return true;
+        } else {
+            throw new NotFoundException("User not found with email: " + email);
         }
     }
 
     @Override
-    public UserResponse getSelectedUser(String emailAddress) {
-        if(userDao.existsById(emailAddress)){
-            UserEntity userEntityByUserEmail = userDao.getUserEntityByEmail(emailAddress);
-            return mapping.convertToUserDTO(userEntityByUserEmail);
-        }else {
-            return new UserErrorResponse(0, "User not found");
-        }
+    public UserDetailsService userDetailsService() {
+        return email -> userDAO.findByEmail(email).orElseThrow(() -> new NotFoundException("User not found"));
     }
 
-    @Override
-    public List<UserDTO> getAllUsers() {
-        List<UserEntity> getAllUsers = userDao.findAll();
-        return mapping.convertUserToDTOList(getAllUsers);
+    private StaffEntity.Role getUserRole(String email) {
+        return staffDAO.findByEmail(email)
+                .map(StaffEntity::getRole)
+                .orElseThrow(() ->
+                        new NotFoundException("User not found for email: " + email));
     }
 }

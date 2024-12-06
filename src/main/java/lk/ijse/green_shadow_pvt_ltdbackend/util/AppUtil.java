@@ -1,24 +1,20 @@
 package lk.ijse.green_shadow_pvt_ltdbackend.util;
 
-import org.springframework.web.multipart.MultipartFile;
-
+import java.awt.*;
 import java.util.Base64;
-import java.util.UUID;
 
 public class AppUtil {
-
-    public static String createUserId(){
-        return "USER-"+ UUID.randomUUID();
+    public static String toBase64Pic(byte[] pic) {
+        return Base64.getEncoder().encodeToString(pic);
     }
 
-    public static String toBase64ProfilePic(MultipartFile profilePic){
-        String proPicBase64 = null;
-        try {
-            byte [] proPicBytes = profilePic.getBytes();
-            proPicBase64 =  Base64.getEncoder().encodeToString(proPicBytes);
-        }catch (Exception e){
-            e.printStackTrace();
+    public static Point parseLocation(String location) {
+        String[] coordinates = location.split(",");
+        if (coordinates.length == 2) {
+            double latitude = Double.parseDouble(coordinates[0]);
+            double longitude = Double.parseDouble(coordinates[1]);
+            return new Point((int) latitude, (int) longitude);
         }
-        return proPicBase64;
+        throw new IllegalArgumentException("Invalid location format");
     }
 }
